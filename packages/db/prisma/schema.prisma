@@ -1,0 +1,75 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  players      Player[]
+}
+
+model Game {
+  id              String     @id @default(cuid())
+  roomCode        String     @unique
+  status          GameStatus @default(WAITING)
+  playerCount     Int        @default(4)
+  currentPlayerId String?
+  diceValue       Int?
+  diceRolled      Boolean    @default(false)
+  winnerId        String?
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  players         Player[]
+}
+
+model Player {
+  id        String      @id @default(cuid())
+  color     PlayerColor
+  rank      Int ?
+  createdAt DateTime    @default(now())
+  userId    String
+  user      User        @relation(fields: [userId], references: [id])
+  gameId    String
+  game      Game        @relation(fields: [gameId], references: [id])
+  tokens    Token[]
+
+  @@unique([gameId, color])
+  @@unique([gameId, userId])
+}
+
+model Token {
+  id       String      @id @default(cuid())
+  color    PlayerColor
+  position Int         @default(0)
+  status   TokenStatus @default(HOME)
+  playerId String
+  player   Player      @relation(fields: [playerId], references: [id])
+}
+
+enum GameStatus {
+  WAITING
+  IN_PROGRESS
+  FINISHED
+}
+
+enum PlayerColor {
+  RED
+  GREEN
+  YELLOW
+  BLUE
+}
+
+enum TokenStatus {
+  HOME
+  ACTIVE
+  FINISHED
+}
