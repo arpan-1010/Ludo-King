@@ -15,7 +15,7 @@
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "scripts": {
-    "generate": "prisma generate",
+   "generate": "prisma generate --schema=./prisma/schema.prisma",
     "migrate": "prisma migrate dev",
     "migrate:prod": "prisma migrate deploy",
     "studio": "prisma studio",
