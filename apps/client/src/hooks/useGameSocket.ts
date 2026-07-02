@@ -7,15 +7,14 @@ const WS_URL = "ws://localhost:3000/ws";
 const RECONNECT_DELAY = 3000;
 
 export function useGameSocket(gameId: string | null) {
-  const wsRef           = useRef<WebSocket | null>(null);
-  const reconnectTimer  = useRef<ReturnType<typeof setTimeout> | null>(null);
-  // shouldReconnect = false when we intentionally close (navigate away)
+  const wsRef = useRef<WebSocket | null>(null);
+  const reconnectTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const shouldReconnect = useRef(true);
 
-  const token          = useAuthStore((s) => s.token);
-  const setGameState   = useGameStore((s) => s.setGameState);
-  const setConnected   = useGameStore((s) => s.setConnected);
-  const setError       = useGameStore((s) => s.setError);
+  const token = useAuthStore((s) => s.token);
+  const setGameState = useGameStore((s) => s.setGameState);
+  const setConnected = useGameStore((s) => s.setConnected);
+  const setError = useGameStore((s) => s.setError);
   const setLastMessage = useGameStore((s) => s.setLastMessage);
 
   const connect = useCallback(() => {
