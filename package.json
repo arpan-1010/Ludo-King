@@ -9,8 +9,11 @@
   "scripts": {
     "dev:server": "bun run --filter @repo/server dev",
     "dev:client": "bun run --filter @repo/client dev",
+    "build:server": "bun run --filter @repo/server build",
+    "build:client": "bun run --filter @repo/client build",
     "db:generate": "bun run --filter @repo/db generate",
     "db:migrate": "bun run --filter @repo/db migrate",
+    "db:migrate:prod": "bun run --filter @repo/db migrate:prod",
     "db:studio": "bun run --filter @repo/db studio",
     "generate": "prisma generate --schema=prisma/schema.prisma",
     "migrate": "prisma migrate dev --schema=prisma/schema.prisma",
