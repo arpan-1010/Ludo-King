@@ -1,6 +1,6 @@
 import type { AuthResponse, LogInRequest, RegisterRequest, CreateGameRequest, CreateGameResponse, JoinGameRequest, JoinGameResponse, GameState } from "@repo/shared";
 
-const BASE_URL = "";
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 async function request<T>(
   path: string,
