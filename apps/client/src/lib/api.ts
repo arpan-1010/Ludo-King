@@ -12,7 +12,7 @@ async function request<T>(
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
   };
 
-  const res = await fetch(`${BASE_URL}/${path}`, {
+  const res = await fetch(`${BASE_URL}/${path}`.replace(/([^:])\/\/+/g, "$1/"), {
     ...options,
     headers,
   });
