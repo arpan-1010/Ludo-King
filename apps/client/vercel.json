@@ -1,8 +1,12 @@
 {
   "rewrites": [
     {
-      "source": "/(.*)",
-      "destination": "/index.html"
+      "source": "/auth/:path*",
+      "destination": "https://ludo-king-production-4c22.up.railway.app/auth/:path*"
+    },
+    {
+      "source": "/game/:path*",
+      "destination": "https://ludo-king-production-4c22.up.railway.app/game/:path*"
     }
   ]
 }
