@@ -13,10 +13,10 @@ A full-stack multiplayer Ludo game built as a Bun monorepo.
 ## 🛠 Tech Stack
 |Layer|Technology|
 |---|---|
-|Frontend|React, Vite, TypeScript, Tailwind CSS, shadcn/ui|
-|Backend|Hono, Bun|
+|Frontend|React, Vite, Tailwind CSS, shadcn/ui|
+|Backend|TypeScript, Hono, Bun|
 |Database|PostgreSQL, Prisma|
-|Realtime|WebSockets/Socket architecture|
+|Realtime|WebSockets architecture|
 |Deployment|Vercel + Railway|
 
 ## 📁 Project Structure
