@@ -3,7 +3,12 @@ import { useGameStore } from "../store/gameStore";
 import { useAuthStore } from "../store/authStore";
 import type { ClientMessage, ServerMessage } from "@repo/shared";
 
-const WS_URL = "ws://localhost:3000/ws";
+const WS_URL = import.meta.env.VITE_SERVER_URL
+  ? import.meta.env.VITE_SERVER_URL
+      .replace("https://", "wss://")
+      .replace("http://", "ws://") + "/ws"
+  : "ws://localhost:3000/ws";
+
 const RECONNECT_DELAY = 3000;
 
 export function useGameSocket(gameId: string | null) {
