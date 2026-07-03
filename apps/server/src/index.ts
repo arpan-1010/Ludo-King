@@ -14,16 +14,14 @@ app.use("*", logger());
 app.use(
   "*",
   cors({
-  origin: (origin) => {
-    const allowed = [
+    origin: [
+      "http://localhost:5173",
       process.env.CLIENT_URL ?? "http://localhost:5173",
-    ];
-    return allowed.includes(origin ?? "") || !origin;
-  },
-  allowHeaders: ["Content-Type", "Authorization"],
-  allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  credentials: true,
-}),
+    ],
+    allowHeaders: ["Content-Type", "Authorization"],
+    allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    credentials: true,
+  })
 );
 
 app.route("/auth", authRoutes);
