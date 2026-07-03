@@ -11,18 +11,12 @@ const app = new Hono();
 const PORT = Number(process.env.PORT) || 3000;
 
 app.use("*", logger());
-app.use(
-  "*",
-  cors({
-    origin: [
-      "http://localhost:5173",
-      process.env.CLIENT_URL ?? "http://localhost:5173",
-    ],
-    allowHeaders: ["Content-Type", "Authorization"],
-    allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    credentials: true,
-  })
-);
+app.use("*", cors({
+  origin: process.env.CLIENT_URL ?? "http://localhost:5173",
+  allowHeaders: ["Content-Type", "Authorization"],
+  allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  credentials: true,
+}));
 
 app.route("/auth", authRoutes);
 app.route("/game", gameRoutes);
