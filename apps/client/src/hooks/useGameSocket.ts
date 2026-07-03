@@ -1,14 +1,23 @@
 import { useEffect, useRef, useCallback } from "react";
-import { useGameStore } from "../store/gameStore";
-import { useAuthStore } from "../store/authStore";
+import { useGameStore } from "../store/gameStore.ts";
+import { useAuthStore } from "../store/authStore.ts";
 import type { ClientMessage, ServerMessage } from "@repo/shared";
 
-const WS_URL = import.meta.env.VITE_SERVER_URL
-  ? import.meta.env.VITE_SERVER_URL
-      .replace("https://", "wss://")
-      .replace("http://", "ws://") + "/ws"
-  : "ws://localhost:3000/ws";
+function getWsUrl(): string {
+  const serverUrl = import.meta.env.VITE_SERVER_URL as string | undefined;
 
+  if (serverUrl) {
+    const wsBase = serverUrl
+      .replace(/^https:\/\//, "wss://")
+      .replace(/^http:\/\//, "ws://")
+      .replace(/\/$/, "");
+    return `${wsBase}/ws`;
+  }
+
+  return "ws://localhost:3000/ws";
+}
+
+const WS_BASE_URL = getWsUrl();
 const RECONNECT_DELAY = 3000;
 
 export function useGameSocket(gameId: string | null) {
@@ -30,10 +39,14 @@ export function useGameSocket(gameId: string | null) {
       wsRef.current.close();
     }
 
-    const ws = new WebSocket(`${WS_URL}?gameId=${gameId}&token=${token}`);
+    const url = `${WS_BASE_URL}?gameId=${gameId}&token=${token}`;
+    console.log("[WS] Connecting to:", url);
+
+    const ws = new WebSocket(url);
     wsRef.current = ws;
 
     ws.onopen = () => {
+      console.log("[WS] Connected");
       setConnected(true);
       setError(null);
     };
@@ -43,6 +56,7 @@ export function useGameSocket(gameId: string | null) {
       try {
         msg = JSON.parse(event.data as string) as ServerMessage;
       } catch {
+        console.error("[WS] Failed to parse message:", event.data);
         return;
       }
 
@@ -63,14 +77,17 @@ export function useGameSocket(gameId: string | null) {
       }
     };
 
-    ws.onclose = () => {
+    ws.onclose = (event) => {
+      console.log("[WS] Disconnected — code:", event.code, "reason:", event.reason);
       setConnected(false);
       if (shouldReconnect.current) {
+        console.log("[WS] Reconnecting in", RECONNECT_DELAY, "ms...");
         reconnectTimer.current = setTimeout(connect, RECONNECT_DELAY);
       }
     };
 
-    ws.onerror = () => {
+    ws.onerror = (event) => {
+      console.error("[WS] Error:", event);
       setError("Connection error");
     };
   }, [gameId, token]);
@@ -95,6 +112,8 @@ export function useGameSocket(gameId: string | null) {
   const sendMessage = useCallback((msg: ClientMessage) => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
       wsRef.current.send(JSON.stringify(msg));
+    } else {
+      console.warn("[WS] Cannot send — socket not open. State:", wsRef.current?.readyState);
     }
   }, []);
 
