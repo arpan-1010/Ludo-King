@@ -3,9 +3,7 @@
 To install dependencies:
 
 ```bash
-bun install
-```
-
+bun instal
 To run:
 
 ```bash
