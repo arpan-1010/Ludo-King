@@ -1,8 +1,19 @@
 import type { ServerWebSocket } from "bun";
 import { prisma } from "@repo/db";
 import type { ClientMessage } from "@repo/shared";
-import { joinRoom, leaveRoom, broadcast, sendToPlayer, type WsData } from "./roomManager.js";
-import { handleDiceRoll, handleTokenMove, fetchGameState } from "../engine/gameEngine.js";
+import { verifyToken } from "../lib/jwt.js";
+import {
+  joinRoom,
+  leaveRoom,
+  broadcast,
+  sendToPlayer,
+  type WsData,
+} from "./roomManager.js";
+import {
+  handleDiceRoll,
+  handleTokenMove,
+  fetchGameState,
+} from "../engine/gameEngine.js";
 
 type LudoWebSocket = ServerWebSocket<WsData>;
 
@@ -12,11 +23,23 @@ export const wsHandler = {
 
     joinRoom(gameId, playerId, ws);
 
+    const pingInterval = setInterval(() => {
+      try {
+        if (ws.readyState === WebSocket.OPEN) {
+          ws.ping();
+        } else {
+          clearInterval(pingInterval);
+        }
+      } catch {
+        clearInterval(pingInterval);
+      }
+    }, 25000);
+
+    (ws.data as WsData & { pingInterval?: ReturnType<typeof setInterval> }).pingInterval = pingInterval;
+
     const gameState = await fetchGameState(gameId);
     if (gameState) {
-      ws.send(
-        JSON.stringify({ type: "RECONNECT_STATE", payload: gameState })
-      );
+      ws.send(JSON.stringify({ type: "RECONNECT_STATE", payload: gameState }));
     }
 
     const player = await prisma.player.findUnique({
@@ -32,16 +55,16 @@ export const wsHandler = {
         type: "PLAYER_JOINED",
         payload: {
           player: {
-            id: player.id,
-            userId: player.userId,
+            id:       player.id,
+            userId:   player.userId,
             username: player.user.username,
-            color: player.color as import("@repo/shared").PlayerColor,
-            rank: player.rank ?? null,
-            tokens: player.tokens.map((t: typeof player.tokens[number]) => ({
-              id: t.id,
-              color: t.color as import("@repo/shared").PlayerColor,
+            color:    player.color as import("@repo/shared").PlayerColor,
+            rank:     player.rank,
+            tokens:   player.tokens.map((t: typeof player.tokens[number]) => ({
+              id:       t.id,
+              color:    t.color as import("@repo/shared").PlayerColor,
               position: t.position,
-              status: t.status as "HOME" | "ACTIVE" | "FINISHED",
+              status:   t.status as "HOME" | "ACTIVE" | "FINISHED",
             })),
           },
           gameState,
@@ -54,16 +77,13 @@ export const wsHandler = {
     const { gameId, playerId } = ws.data;
 
     let msg: ClientMessage;
-
     try {
       msg = JSON.parse(raw.toString()) as ClientMessage;
     } catch {
-      ws.send(
-        JSON.stringify({
-          type: "ERROR",
-          payload: { message: "Invalid JSON", code: "PARSE_ERROR" },
-        })
-      );
+      ws.send(JSON.stringify({
+        type: "ERROR",
+        payload: { message: "Invalid JSON", code: "PARSE_ERROR" },
+      }));
       return;
     }
 
@@ -72,20 +92,14 @@ export const wsHandler = {
         case "ROLL_DICE": {
           const { messages } = await handleDiceRoll(gameId, playerId);
           for (const m of messages) broadcast(gameId, m);
-
           const state = await fetchGameState(gameId);
           if (state) broadcast(gameId, { type: "GAME_STATE", payload: state });
           break;
         }
 
         case "MOVE_TOKEN": {
-          const messages = await handleTokenMove(
-            gameId,
-            playerId,
-            msg.payload.tokenId
-          );
+          const messages = await handleTokenMove(gameId, playerId, msg.payload.tokenId);
           for (const m of messages) broadcast(gameId, m);
-
           const state = await fetchGameState(gameId);
           if (state) broadcast(gameId, { type: "GAME_STATE", payload: state });
           break;
@@ -93,7 +107,6 @@ export const wsHandler = {
 
         case "LEAVE_ROOM": {
           leaveRoom(gameId, playerId);
-
           const state = await fetchGameState(gameId);
           if (state) {
             broadcast(gameId, {
@@ -108,36 +121,33 @@ export const wsHandler = {
         case "JOIN_ROOM": {
           const state = await fetchGameState(gameId);
           if (state) {
-            sendToPlayer(gameId, playerId, {
-              type: "RECONNECT_STATE",
-              payload: state,
-            });
+            sendToPlayer(gameId, playerId, { type: "RECONNECT_STATE", payload: state });
           }
           break;
         }
 
         default: {
-          ws.send(
-            JSON.stringify({
-              type: "ERROR",
-              payload: { message: "Unknown message type", code: "UNKNOWN_TYPE" },
-            })
-          );
+          ws.send(JSON.stringify({
+            type: "ERROR",
+            payload: { message: "Unknown message type", code: "UNKNOWN_TYPE" },
+          }));
         }
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unknown error";
-      ws.send(
-        JSON.stringify({
-          type: "ERROR",
-          payload: { message, code: "ENGINE_ERROR" },
-        })
-      );
+      ws.send(JSON.stringify({
+        type: "ERROR",
+        payload: { message, code: "ENGINE_ERROR" },
+      }));
     }
   },
 
   async close(ws: LudoWebSocket) {
     const { gameId, playerId } = ws.data;
+
+    const data = ws.data as WsData & { pingInterval?: ReturnType<typeof setInterval> };
+    if (data.pingInterval) clearInterval(data.pingInterval);
+
     leaveRoom(gameId, playerId);
 
     const state = await fetchGameState(gameId);
