@@ -21,111 +21,84 @@ A full-stack multiplayer Ludo game built as a Bun monorepo.
 
 ## 📁 Project Structure
 ```text
-  Ludo-King-main/
-    .env.example
-    .gitignore
-    bun.lock
-    index.ts
-    package.json
-    tsconfig.json
-    apps/
-      client/
-        .env.production
-        .gitignore
-        bun.lock
-        components.json
-        index.html
-        index.ts
-        package.json
-        postcss.config.js
-        tailwind.config.js
-        tsconfig.json
-        vercel.json
-        vite.config.ts
-        src/
-          App.tsx
-          index.css
-          main.tsx
-          vite-env.d.ts
-          components/
-            Board.tsx
-            Dice.tsx
-            Navbar.tsx
-            PlayerHUD.tsx
-            WaitingRoom.tsx
-            WinScreen.tsx
-            ui/
-              button.tsx
-              card.tsx
-              input.tsx
-              label.tsx
-          hooks/
-            useAuth.ts
-            useDarkMode.ts
-            useGameSocket.ts
-          lib/
-            api.ts
-            utils.ts
-          pages/
-            GamePage.tsx
-            LobbyPage.tsx
-            LoginPage.tsx
-            NotFoundPage.tsx
-            RegisterPage.tsx
-          store/
-            authStore.ts
-            gameStore.ts
-      server/
-        .gitignore
-        Dockerfile
-        bun.lock
-        index.ts
-        package.json
-        tsconfig.json
-        src/
-          index.ts
-          engine/
-            boardUtils.ts
-            dice.ts
-            gameEngine.ts
-          lib/
-            jwt.ts
-            password.ts
-          middleware/
-            auth.ts
-          routes/
-            auth.ts
-            game.ts
-          ws/
-            handler.ts
-            roomManager.ts
-    packages/
-      db/
-        .gitignore
-        bun.lock
-        index.ts
-        package.json
-        tsconfig.json
-        prisma/
-          schema.prisma
-          migrations/
-            migration_lock.toml
-            20260616124620_init/
-              migration.sql
-            20260616132807_rank_optional/
-              migration.sql
-        src/
-          index.ts
-      shared/
-        .gitignore
-        bun.lock
-        index.ts
-        package.json
-        tsconfig.json
-        src/
-          constants.ts
-          index.ts
-          types.ts
+  ludo-king/
+├── package.json
+├── tsconfig.json
+├── .env
+├── .env.example
+├── .gitignore
+├── bun.lockb
+│
+├── apps/
+│   │
+│   ├── server/ (D)
+│   │   ├── package.json
+│   │   ├── tsconfig.json
+│   │   └── src/
+│   │       ├── index.ts
+│   │       ├── routes/
+│   │       │   ├── auth.ts (D)
+│   │       │   └── game.ts (D)
+│   │       ├── ws/
+│   │       │   ├── handler.ts
+│   │       │   └── roomManager.ts
+│   │       ├── engine/
+│   │       │   ├── gameEngine.ts (D)
+│   │       │   ├── dice.ts (D)
+│   │       │   └── boardUtils.ts (D)
+│   │       ├── middleware/
+│   │       │   └── auth.ts (D)
+│   │       └── lib/
+│   │           ├── jwt.ts (D)
+│   │           └── password.ts (D)
+│   │
+│   └── client/
+│       ├── package.json
+│       ├── tsconfig.json
+│       ├── vite.config.ts
+│       ├── index.html
+│       └── src/
+│           ├── main.tsx
+│           ├── App.tsx
+│           ├── pages/
+│           │   ├── LoginPage.tsx
+│           │   ├── RegisterPage.tsx
+│           │   ├── LobbyPage.tsx
+│           │   └── GamePage.tsx
+│           ├── components/
+│           │   ├── ui/          (ShadCN auto-generated)
+│           │   ├── Board.tsx
+│           │   ├── Token.tsx
+│           │   ├── Dice.tsx
+│           │   ├── PlayerHUD.tsx
+│           │   └── WinScreen.tsx
+│           ├── hooks/
+│           │   ├── useGameSocket.ts
+│           │   └── useAuth.ts
+│           ├── store/
+│           │   ├── gameStore.ts
+│           │   └── authStore.ts
+│           └── lib/
+│               ├── api.ts
+│               └── utils.ts
+│
+└── packages/
+    │
+    ├── shared/ (D)
+    │   ├── package.json
+    │   ├── tsconfig.json
+    │   └── src/
+    │       ├── index.ts (D)
+    │       ├── types.ts (D)
+    │       └── constants.ts (D)
+    │
+    └── db/ (D)
+        ├── package.json
+        ├── tsconfig.json
+        ├── schema.prisma
+        ├── src/
+        │   └── index.ts
+        └── migrations/       (auto-generated by Prisma)
 ```
 
 ## 🚀 Getting Started
