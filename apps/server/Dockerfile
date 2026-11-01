@@ -10,7 +10,7 @@ COPY packages/db ./packages/db
 
 COPY apps/server ./apps/server
 
-RUN bun install --frozen-lockfile
+RUN bun install
 
 RUN cd packages/db && bunx prisma generate --schema=prisma/schema.prisma
 
